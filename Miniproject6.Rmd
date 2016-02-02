@@ -1,0 +1,93 @@
+---
+title: "MiniProject6"
+output: word_document
+---
+
+```{r}
+# Comparing model1 and model2 with variable gleason(categorical)
+data.frame <- read.csv(file="/Users/shobhikapanda/Downloads/prostate_cancer.csv",head=TRUE,sep=",")
+z1<-log(data.frame$psa)
+z2<-log(data.frame$cancervol)
+z3<-data.frame$gleason
+#Create Regression
+model1<-lm(z1 ~z2 + factor(z3))
+model2<-lm(z1 ~z2)
+#summary
+summary(model1)
+#annova 
+anova(model2,model1)
+```
+
+```{r}
+# Comparing model1 and model2 with variable benpros
+z1<-log(data.frame$psa)
+z2<-log(data.frame$cancervol)
+z3<-data.frame$benpros
+#Create Regression
+model1<-lm(z1 ~z2 + z3)
+model2<-lm(z1 ~z2)
+#summary
+summary(model1)
+#anova
+anova(model2,model1)
+```
+```{r}
+# Comparing model1 and model2 with variable capspen
+z1<-log(data.frame$psa)
+z2<-log(data.frame$cancervol)
+z3<-data.frame$capspen
+model1<-lm(z1 ~z2 + z3)
+model2<-lm(z1 ~z2)
+summary(model1)
+anova(model2,model1)
+```
+
+```{r}
+# Comparing model1 and model2 with variable weight
+z1<-log(data.frame$psa)
+z2<-log(data.frame$cancervol)
+z3<-data.frame$weight
+model1<-lm(z1 ~z2 + z3)
+model2<-lm(z1 ~z2)
+summary(model1)
+anova(model2,model1)
+```
+```{r}
+# Comparing model1 and model2 with variable age
+z1<-log(data.frame$psa)
+z2<-log(data.frame$cancervol)
+z3<-data.frame$age
+model1<-lm(z1 ~z2 + z3)
+model2<-lm(z1 ~z2)
+summary(model1)
+anova(model2,model1)
+```
+
+```{r}
+# Comparing model1 and model2 with variable vesinv
+z1<-log(data.frame$psa)
+z2<-log(data.frame$cancervol)
+z3<-data.frame$vesinv
+model1<-lm(z1 ~z2 + factor(z3))
+model2<-lm(z1 ~z2)
+summary(model1)
+anova(model2,model1)
+#Check for errors whether they have mean zero constant variance,normality and independence of residual error
+plot(fitted(model1),resid(model1), main="RESIDUAL PLOT")
+abline(h=0)
+plot(model1)
+qqnorm(resid(model1),main="QQPLOT")
+qqline(resid(model1))
+plot(resid(model1), type="l",main="Time Series Plot")
+abline(h=0)
+median(data.frame$vesinv)
+summary(model1)
+#Predict PSA level for median values of cancervol and vesinv
+pp_val <- exp(1)^(predict(model1,data.frame(z2=log(median(data.frame$cancervol)),z3=(data.frame$vesinv=0))))
+pp_val
+
+
+
+```
+
+

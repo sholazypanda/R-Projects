@@ -1,0 +1,127 @@
+---
+title: "MiniProject4"
+output: word_document
+---
+
+```{r}
+#read from the table
+data.frame<- read.table("/Users/shobhikapanda/Downloads/bp.txt", header=T)
+#Box plots showing mean median and outliers
+boxplot(data.frame$armsys,data.frame$fingsys,ylab="Systolic blood pressure",main="Measurement of blood pressure in mmHg",names=c('armsys','fingsys'),range=1.5)
+
+summary(data.frame$armsys)
+summary(data.frame$fingsys)
+probabilities = (1:200)/(200+1)
+# There are considerably less number of outliers by armsys method.
+# There are considerably lower number of patients with high systolic pressure by armsys method.
+# There are considerably higher number of patients with high pressure by fingsys method.
+# Both are right skewed , mean is greater than the median
+normal.quantiles = qnorm(probabilities, mean(data.frame$armsys, na.rm = T), sd(data.frame$armsys, na.rm = T))
+plot(sort(normal.quantiles), sort(data.frame$armsys) , xlab = 'Theoretical Quantiles from Normal Distribution', ylab = 'Sample Quqnatiles of Ozone', main = 'Normal Quantile-Quantile Plot of Ozone')
+abline(0,1)
+normal.quantiles = qnorm(probabilities, mean(data.frame$fingsys, na.rm = T), sd(data.frame$fingsys, na.rm = T))
+plot(sort(normal.quantiles), sort(data.frame$fingsys) , xlab = 'Theoretical Quantiles from Normal Distribution', ylab = 'Sample Quqnatiles of Ozone', main = 'Normal Quantile-Quantile Plot of Ozone')
+abline(0,1)
+
+```
+
+```{r}
+
+par(mfrow=c(1,2))
+#assessing normality using qqnorm, qqline and hist for both the columns of the data frame
+qqnorm(data.frame$armsys)
+qqline(data.frame$armsys, col = "red")
+qqnorm(data.frame$fingsys)
+qqline(data.frame$fingsys, col = "red")
+hist(data.frame$armsys,main="Histogram for armsys",xlab="armsys",ylab="Frequency")
+hist(data.frame$fingsys,main="Histogram for finsys",xlab="fingsys",ylab="Frequency")
+#Reasonably normal, since the line deviates at the left and right tails for armsys
+#For fingsys method,it is considerably normal as the line deviates mostly at the right tail.
+```
+```{r}
+alpha=0.05
+x<-data.frame$armsys
+y<-data.frame$fingsys
+#difference of both column values for paired data Z test
+# Assumption is :H0:Mu1=Mu2 H1:Mu1!=Mu2 
+d=x-y
+n <- length(d)
+alpha <- 0.05
+mean(d) + c(-1, 1) * qnorm(1 - (alpha/2)) * sd(d)/sqrt(n)
+# 0 does not lie in this interval, which clearly states that we reject H0
+# Assumption H0 doesnt hold here.
+qnorm(1 - (alpha/2))
+zstat <- mean(d)/(sd(d)/sqrt(n))
+zstat
+pval <- 2*(1-pnorm(abs(zstat)))
+pval
+# Since p-value <= 0.05, we reject H0. There is statistically significant evidence 
+# that they do not have equal means
+# The result seem to be consistent for both the methods.
+```
+
+
+```{r}
+# assumption H0:Mu=10, H1:Mu>10
+#Right tailed test
+mean=10;
+n=20;
+sx=9.02;
+sd=2.22;
+alpha=0.05;
+#Using T null distribution for the test statistics calculation
+#observed value for the test statistics
+tobs=(sx-mean)/(sd/sqrt(n))
+tobs
+#p values using normal method
+pval=1-pt(tobs,n-1)
+pval
+#Accept H0 since pval>=0.05
+qt(1-alpha, n-1)
+
+# Accept H0 since tobs< 1.72 since qt value results in 1.72 and conclusion is mu=10.
+#testing t for normally distributed variables
+x = rnorm(20,mean=9.02,sd=2.22)
+x
+t.test(x,alternative="greater",mu=10,conf.level=1-alpha)
+p<-0
+#values are more less same but the randomization doesnt correspond to the actual values so 
+# we use rt to improve the randomization
+#testing t with rt, simulating it 1000 times
+fn1<-function()
+{
+tval<-rt(1000,19)
+for(i in 1:length(tval))
+{
+  # for every tstatistics value that is greater than tobs since it is right tailed test,we keep summing up our probability, since our likelihood of accepting increases
+  if(tval[i]>=tobs)
+  {
+    p<-p+1
+  }
+}
+return(p)
+}
+fn1()/1000
+# we get the exact p value as simulated above with monte carlo same as using normal method
+```
+```{r}
+# hypothesis is H0:muy -mux =0 and H1: muy-mux > 0
+n.x<-400
+n.y<-500
+X<-2635
+Y<-2887
+sd.x<-365
+sd.y<-412
+alpha<-0.05
+sde<-sqrt((sd.x^2/n.x)+(sd.y^2/n.y))
+C.I.<-Y-X+c(-1,1)*qnorm(1-alpha/2)*sde
+C.I.
+# CI is 201.1711  302.8289
+
+Zscore<-((Y-X)/sde)
+Zscore#9.717132
+1-qnorm(alpha)#2.644854
+pval<-1-pnorm(Zscore)#0
+#right tailed test
+#since pval<=0.05 Reject H0, mean credit limit of May 2011 is greater than January 2011
+```

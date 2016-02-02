@@ -1,0 +1,58 @@
+---
+title: "Happly Planet Index"
+output: word_document
+---
+```{r}
+boxplot(before, after, names = c("before", "after"))
+q1 <- quantile(before)[2] 
+q3 <- quantile(after)[4]
+iqr<-q3-q1
+iqr(before)
+iqr(after)
+```
+```{r}
+x<-rnorm(5000,5,2)
+quantile(x,97.5)
+```
+
+```{r}
+year <- seq(1790, 2010, 10)
+pop <- c(3.9, 5.3, 7.2, 9.6, 12.9, 17.1, 23.2, 31.4, 38.6, 50.2, 63, 76.2, 92.2,
+106, 123.2, 132.2, 151.3, 179.3, 203.3, 226.5, 248.7, 281.4, 308.7)
+plot(pop ~ year, xlab = "Year", ylab = "Population")
+```
+
+
+```{r}
+#load library to read data
+library(gdata)
+#set working directory to let read.xls extract the file
+setwd("~/Downloads")
+#make the data frame by skipping some lines from the sheet number 2 which shows appropriate indexes. Sheet is "rank order". Enter the column names as header
+df <- read.xls("hpi-data.xlsx",sheet=2,skip=2,header=TRUE,fill=T,stringsAsFactors=F)
+#Draw the histogram and boxplot to show which measure of distribution should be used? Mean or median 
+hist(df$Happy.Planet.Index)
+boxplot(df$Happy.Planet.Index)
+#Clearly shows normal distribution with mean as measure of distribution with no outliers and skews. It is symmetric
+# plot the three scatterplots in one row
+par(mfrow=c(1,3))
+#Scatter plot of HPI in red against Life Expectancy
+plot(df$Happy.Planet.Index,df$Life..Expectancy, col=c("red","blue"),main="Scatterplot Life Expectancy", 
+  	xlab="HPI ", ylab="Life expectancy ", pch=19)
+#Scatter plot of HPI in red against Well Being
+plot(df$Happy.Planet.Index,df$Well.being..0.10.,col=c("red","blue"), main="Scatterplot Well Being", 
+  	xlab="HPI ", ylab="Well being ", pch=19)
+#Scatter plot of HPI in red against Foot Print
+plot(df$Happy.Planet.Index,df$Footprint..gha.capita.,col=c("red","blue"),main="Scatterplot Footprint", 
+  	xlab="HPI ", ylab="Foot print ", pch=19)
+#Extract the three variables(LE,WB,FP) from the data frame , put it in x
+x <- df[6:8]
+#Extract HPI and put it in Y
+y <- df[10]
+#Check correlation of y against all three variables X
+cor(x,y)
+
+
+```
+
+

@@ -1,0 +1,125 @@
+  ---
+title: "Mini Project 3"
+output: word_document
+---
+
+```{r}
+conf.init<-function(pcap,n,se.pcap){
+  pcap = rbinom(n,1,pcap)
+  ci<- mean(pcap) + c(-1, 1) * qnorm(1 - (alpha/2)) * se.pcap
+  return(ci)
+}
+
+# store the values of pc and n in vector
+pc = c(0.05, 0.1, 0.25, 0.5, 0.9, 0.95)
+n = c(5, 10, 30, 50, 100)
+for (ni in n){
+  dev.new()
+  par(mfrow=c(2,3))
+  for(pi in pc) {
+n=ni; pcap=pi
+alpha = 0.05        
+se.pcap = sqrt(pcap*(1-pcap)/n)    # compute SE
+conf.init(pcap,n,se.pcap)
+nsim<-100
+# replicate this function 100 times to perform monte carlo
+ci.mat<-replicate(nsim,conf.init(pcap,n,se.pcap))
+mean(pcap)
+# plot the marplot to see the width in different experiments
+matplot(rbind(1:100,1:100),type="l",lty=1,ci.mat[,1:100],xlab="sample",ylab="CI")
+abline(h=pcap)
+mean((pcap>=ci.mat[1,])*(pcap<=ci.mat[2,]))
+  }
+}
+
+
+
+
+```
+```{r}
+#Coverage probabilty
+m=1000;
+n=c(5,10,30,50,100)
+p=c(0.05,0.1,0.25,0.5,0.9,0.95)
+k=1
+j=1
+for(b in p)
+{ 
+  v=c()
+ 
+  o=1
+  for(a in n)
+  {
+    
+    phat=rbinom(m,a,b)/a
+    SE=sqrt(phat*(1-phat)/a)
+    alpha=0.05;
+    lower=phat - qnorm(1-alpha/2)*SE
+    upper=phat + qnorm(1-alpha/2)*SE
+    sum=0
+    for (i in 1:m)
+    {
+      x= ((b >= lower[i])&(b <= upper[i]) )
+      sum=sum+x
+    }
+    avg=sum/m
+    v[o]=avg
+    o=o+1
+    
+  }
+  if(j){
+    plot(n,v,ylim=c(0,1),ylab="coverage probability",type="l")
+    print(j)
+    j=0
+  }  
+  lines(n,v,lty=1)
+}
+abline(h=0.95)
+```
+
+
+```{r}
+child<-c(40.3, 55, 45.7, 43.3, 50.3, 45.9, 53.5, 43, 44.2, 44, 47.4, 44, 33.6, 55.1,
+         48.8, 50.4, 37.8, 60.3, 46.5)
+adult<-c(20, 30.2, 2.2, 7.5, 4.4, 22.2, 16.6, 14.5, 21.4, 3.3, 6.6, 7.8, 10.6, 16.2,
+         14.5, 4.1, 15.8, 4.1, 2.4, 3.5, 8.5, 10, 1, 4.4, 1.3, 8.1, 4.7, 18.4)
+par(mfrow=c(1,2))
+# plot qqolot for child cereals
+qqnorm(child)
+qqline(child, col = "red")
+# plot qqplot for adult cereals
+qqnorm(adult)
+qqline(adult,col = "blue")
+
+alpha<-.05
+mean(child)
+mean(adult)
+
+n.x<-length(child)
+n.y<-length(adult)
+# F-distribution to get the upper and lower limit of sigmax/sigmay
+f.l.crit <- qf(alpha/2, n.x - 1, n.y - 1)
+f.u.crit <- qf(1 - (alpha/2), n.x - 1, n.y - 1)
+((sd(child)/sd(adult))^2) * c(1/f.u.crit, 1/f.l.crit)
+
+# get the value of pooled variance using the formula
+pooled_variance<-((n.x-1)* var(child) + (n.y-1)*var(adult))/(n.x+n.y-2)
+
+# get the answer
+mean(child) - mean(adult) + c(-1, 1) * qt(1 - (alpha/2), df = n.x + n.y -2 ) * sqrt(pooled_variance*((1/n.x) + (1/n.y)))
+
+```
+```{r}
+px <- 61/414
+py <- 74/501
+m <- 414
+n <- 501
+phat <- px - py 
+alpha <- 0.05
+SE <- sqrt( ((px*(1-px))/m) + ((py*(1-py))/n))
+# both m and n are large so using formula of Normal distribution with m and n large
+CI <- phat + qnorm(1-(alpha/2))*SE*c(-1,1)
+CI
+
+```
+
