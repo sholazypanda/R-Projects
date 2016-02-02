@@ -1,0 +1,65 @@
+---
+title: "Map Making"
+output: word_document
+---
+
+
+```{r}
+#use install.packages("name of package")
+#Load libraries
+library(ggplot2)
+library(maps)
+library(gdata)
+#read data from xls (convert the states to lower case in xls file before proceeding)
+#setwd() to where your file is located
+mydata=read.xls("usstatesdataset.xlsx")
+#extract state column from map_data
+states<- map_data("state")
+#function to return the final data i.e top 1% income earner states by the year 2012,1999 and difference
+tot_s<-function(y1,y2)
+{
+  #if second parameter is not available, take subset and select columns based on year
+  if((missing(y2))) {
+    newdata<-subset(mydata, Year == y1,select=c(State, Top1_adj))
+  } 
+  #if both the parameters are available, take subset based on difference of the parameter values
+  else { 
+  #update Top1_adj values with the difference of the values of year 2012 and 1999
+   mydata$Top1_adj<-mydata$Top1_adj[which(mydata$Year==y1)]-mydata$Top1_adj[which(mydata$Year==y2)]
+   
+   newdata<-subset(mydata,select=c(State,Top1_adj))
+  }
+  #add new column to newdata to make unique column for both the data frames newdata and states,      which is precondition for join
+  newdata$region <-newdata$State
+  #inner join states and newdata by region which contain state names
+  Final<-merge(states,newdata,by="region")
+ 
+}
+#make a new data frame to collect state abbreviations and coordinates x,y from map package maps
+states1 <- data.frame(state.center, state.abb,state.name)
+#remove abbreviations alaska and hawaii from the state abbreviation list since it is not present in our map_data list
+states1 <- states1[states1$state.abb!="AK",]
+states1 <- states1[states1$state.abb!="HI",]
+head(states1)
+#calculate minimum and maximum values of the Top1% income earners 
+range(tot_s(2012,1999)$Top1_adj)
+#plot using ggplot with data from function tot_s which returns the final data with aesthetics longitute and latitude.
+p <- ggplot()+
+geom_polygon(data = tot_s(2012,1999), aes(x = long, y = lat, group = group, fill = tot_s(2012,1999)$Top1_adj), 
+                 color = "black", size = 0.15) +
+    # without borders(faster)
+    # 	geom_polygon(data = USA.df, aes(x =range long, y = lat, group = group, fill = sexratio), 
+    #		color = "black", size = 0.25) +	
+  #Use red palette to distinguish low income and high income states
+  #Bright red shows something is wrong that is min value  , low income states
+  #Mild red shows the state is prosperous
+  # use seq to extract min and max values from Top1_adj with atleast 7 values to distinguish 
+  scale_fill_distiller(palette = "Reds", breaks =  seq(min(tot_s(2012,1999)$Top1_adj),max(tot_s(2012,1999)$Top1_adj),by=3), trans = "reverse") +
+    labs(title = "top 1% of income earners", fill = "")	+
+  #Geom_text labels the states with their abbreviations
+    geom_text(data=states1, aes(x, y, label = state.abb),
+              color = "orange", size=3) 
+  #save the plot in a pdf file
+  ggsave(p, file = "new_file.pdf")
+```
+
